@@ -29,12 +29,23 @@ def runRequestAndProintResult(userCountryCode, year, params):
         if (reqResult.status_code != 200):
             _printErrorResult(reqResult)
         else:
-            _printResult(userCountryCode, year, reqResult.text)
+            holidays = getHolidays(reqResult.json())
+            _printResult(userCountryCode, year, holidays)
     except Exception as e:
         print("En ukjent feil har opstått ved kall til underliggende web-tjeneste.")            
         print("Tekningske deltaljer:\n " + str(e) )
 
 
+def getHolidays(holidaysDict) -> list:
+    holidays = list()
+    for entry in holidaysDict:
+        dateDict = entry["date"]
+        holiday = Holiday(datetime.datetime(dateDict["year"], dateDict["month"], dateDict["day"]), _getDescriptionText(entry))
+        holidays.append(holiday)
+        
+    return holidays
+    
+    
 def _printErrorResult(reqResult):
     print(f"Kall til underliggende system feilet. Mottok status {reqResult.status_code}" )
     try:
@@ -46,17 +57,24 @@ def _printErrorResult(reqResult):
         pass
     print("Ukjent returverdi: " + reqResult.text)
 
+class Holiday:
+    def __init__(self, date, description = "") -> None:
+        self.date = date
+        self.description = description
+        
+    def getInfo(self):
+        return f"{self.date.strftime('%d.%m.%Y')} {self.description}"
     
-def _printResult(userCountryCode, year, jsonText):
-    holiDays = json.loads(jsonText)
+    
+def _printResult(userCountryCode, year, holidays):
     print(f"\nHer er helligdagene for land {userCountryCode} og år {year}\n")
     print("Dato       Beskrivelse")
     print("---------- ---------------------------------------------------------------")
-    for entry in holiDays:
-        date = datetime.datetime(entry["date"]["year"], entry["date"]["month"], entry["date"]["day"])
-        text = _getDescriptionText(entry)
-        print(f"{date.strftime('%d.%m.%Y')} {text}")
-    
+    for holiday in holidays:
+        print(holiday.getInfo())
+
+    print(f"Det er mange! Dvs: {len(holidays)}")
+
 
 def _getDescriptionText(entry):
     noText = ""
