@@ -18,14 +18,21 @@ def getPublicHolyDays():
     year = _getIntInput("Angi årstall:  ")
 
     params = dict(year=year, country=userCountryCode, holidayType="public_holiday")
-    reqResult = requests.get('https://kayaposoft.com/enrico/json/v3.0/getHolidaysForYear', params)
-
-    if (reqResult.status_code != 200):
-        _printErrorResult(reqResult)
-    else:
-        _printResult(userCountryCode, year, reqResult.text)
+    runRequestAndProintResult(userCountryCode, year, params)            
 
     print("\n\n")
+
+def runRequestAndProintResult(userCountryCode, year, params):
+    try:
+        reqResult = requests.get('https://kayaposoft.com/enrico/json/v3.0/getHolidaysForYear', params)
+
+        if (reqResult.status_code != 200):
+            _printErrorResult(reqResult)
+        else:
+            _printResult(userCountryCode, year, reqResult.text)
+    except Exception as e:
+        print("En ukjent feil har opstått ved kall til underliggende web-tjeneste.")            
+        print("Tekningske deltaljer:\n " + str(e) )
 
 
 def _printErrorResult(reqResult):
