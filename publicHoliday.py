@@ -2,9 +2,8 @@ import requests
 import json
 import datetime
 
-def _getIntInput(prompt):
-    inputOk = False
-    while (not inputOk):
+def _getIntInput(prompt) -> int: 
+    while (True):
         answer = input(prompt)
         if(answer.isdigit()):
             return int(answer)
